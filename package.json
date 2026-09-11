@@ -1,0 +1,16 @@
+{
+  "name": "cold-email-crm",
+  "version": "1.0.0",
+  "description": "Instantly-style Cold Email CRM with Multi-Google Workspace Inbox Rotation, Excel Importer, Spintax, and Deliverability Safeguards",
+  "private": true,
+  "scripts": {
+    "start": "concurrently \"npm run start --prefix server\" \"npm run dev --prefix client\"",
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "server": "npm run dev --prefix server",
+    "client": "npm run dev --prefix client",
+    "build": "npm run build --prefix server && npm run build --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
