@@ -237,7 +237,8 @@ export const api = {
   },
 
   async getDailySummary(): Promise<{ success: boolean; today: any; totalDaysActive: number; days: any[] }> {
-    const res = await fetch(`${API_BASE}/analytics/daily`);
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
+    const res = await fetch(`${API_BASE}/analytics/daily?tz=${encodeURIComponent(tz)}`);
     const data = await res.json();
     return data;
   },

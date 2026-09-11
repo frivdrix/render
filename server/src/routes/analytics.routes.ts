@@ -90,23 +90,32 @@ router.get('/daily', (req: Request, res: Response) => {
   const accounts = db.getAccounts();
   const campaigns = db.getCampaigns();
 
+  const userTz = (req.query.tz as string) || (req.headers['x-timezone'] as string) || 'Asia/Kolkata';
+
   const accountMap = new Map(accounts.map((a) => [a.id, a.email]));
   const campaignMap = new Map(campaigns.map((c) => [c.id, c.name]));
 
-  // Helper to get YYYY-MM-DD string
+  // Helper to get YYYY-MM-DD string in user's timezone
   const toDateStr = (timestamp: number) => {
-    const d = new Date(timestamp);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    try {
+      const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone: userTz,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+      return formatter.format(new Date(timestamp)); // returns YYYY-MM-DD
+    } catch {
+      const d = new Date(timestamp);
+      return d.toISOString().split('T')[0];
+    }
   };
 
   const toDisplayDate = (dateStr: string) => {
     try {
       const [y, m, d] = dateStr.split('-').map(Number);
-      const date = new Date(y, m - 1, d);
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const date = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+      return date.toLocaleDateString('en-US', { timeZone: userTz, month: 'short', day: 'numeric', year: 'numeric' });
     } catch {
       return dateStr;
     }
@@ -134,7 +143,7 @@ router.get('/daily', (req: Request, res: Response) => {
 
   const daysMap = new Map<string, DayAggregate>();
 
-  // Ensure today is always present
+  // Ensure today in user's timezone is always present
   const todayStr = toDateStr(Date.now());
   daysMap.set(todayStr, {
     date: todayStr,
