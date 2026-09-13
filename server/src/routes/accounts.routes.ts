@@ -4,12 +4,14 @@ import { GoogleAccount } from '../types/index.js';
 import { GoogleAuthService } from '../services/google-auth.service.js';
 import { EmailSenderService } from '../services/email-sender.service.js';
 import { WorkspaceDomainService } from '../services/workspace-domain.service.js';
+import { QueueService } from '../services/queue.service.js';
 import { v4 as uuidv4 } from 'uuid';
 
 const router = Router();
 
 // GET all accounts
 router.get('/', (_req: Request, res: Response) => {
+  QueueService.checkAndResetDailyCounters();
   const accounts = db.getAccounts();
   // Strip sensitive passwords & keys from response
   const sanitized = accounts.map((acc) => ({

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {
   Search,
-  Eye,
   Trash2,
   Send,
+  MessageSquare,
+  RefreshCw,
 } from 'lucide-react';
 import { api } from '../services/api.js';
 import { Lead, Campaign } from '../types/index.js';
@@ -66,8 +67,34 @@ export const LeadsView: React.FC = () => {
             </span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Global view of all prospect emails, delivery states, and open activity.
+            Global view of all prospect emails, delivery states, and reply activity.
           </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={async () => {
+              try {
+                const res = await api.syncReplies();
+                alert(res.message);
+                loadLeads();
+              } catch (err: any) {
+                alert(err.message || 'Failed to sync replies');
+              }
+            }}
+            className="px-3.5 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 font-bold text-xs flex items-center gap-2 transition"
+            title="Scan connected inboxes for new prospect replies"
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span>Sync Replies</span>
+          </button>
+          <button
+            onClick={loadLeads}
+            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition"
+            title="Refresh Leads"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -148,27 +175,39 @@ export const LeadsView: React.FC = () => {
                       <td className="p-3.5 text-slate-300">{lead.company || '—'}</td>
                       <td className="p-3.5 text-slate-400 font-sans">{camp?.name || '—'}</td>
                       <td className="p-3.5">
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-sans font-bold uppercase tracking-wider ${
-                            lead.status === 'opened'
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                              : lead.status === 'replied'
-                              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                        <select
+                          value={lead.status}
+                          onChange={async (e) => {
+                            const newStatus = e.target.value;
+                            try {
+                              await api.updateLeadStatus(lead.id, newStatus);
+                              setLeads(leads.map((l) => (l.id === lead.id ? { ...l, status: newStatus as any } : l)));
+                            } catch (err: any) {
+                              alert(err.message || 'Failed to update status');
+                            }
+                          }}
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-sans font-bold uppercase tracking-wider bg-slate-900 border cursor-pointer focus:outline-none ${
+                            lead.status === 'replied'
+                              ? 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                              : lead.status === 'opened'
+                              ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
                               : lead.status === 'sent'
-                              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                              ? 'bg-blue-500/20 text-blue-400 border-blue-500/30'
                               : lead.status === 'bounced'
-                              ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                              : 'bg-slate-800 text-slate-400'
+                              ? 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                              : 'bg-slate-800 text-slate-400 border-slate-700'
                           }`}
                         >
-                          {lead.status}
-                        </span>
+                          <option value="pending">Pending</option>
+                          <option value="sent">Sent</option>
+                          <option value="replied">💬 Replied</option>
+                          <option value="bounced">Bounced</option>
+                        </select>
                       </td>
                       <td className="p-3.5 text-slate-400 font-sans">
-                        {lead.openCount > 0 ? (
-                          <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                            <Eye className="w-3.5 h-3.5" />
-                            {lead.openCount} opens
+                        {lead.status === 'replied' ? (
+                          <span className="text-amber-400 font-bold flex items-center gap-1">
+                            <span>Replied</span>
                           </span>
                         ) : lead.sentAt ? (
                           <span className="text-slate-400 flex items-center gap-1">
@@ -179,7 +218,23 @@ export const LeadsView: React.FC = () => {
                           <span className="text-slate-500">Unsent</span>
                         )}
                       </td>
-                      <td className="p-3.5 text-right">
+                      <td className="p-3.5 text-right flex items-center justify-end gap-1.5">
+                        {lead.status !== 'replied' && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                await api.updateLeadStatus(lead.id, 'replied');
+                                setLeads(leads.map((l) => (l.id === lead.id ? { ...l, status: 'replied' as any } : l)));
+                              } catch (err: any) {
+                                alert(err.message || 'Failed to mark as replied');
+                              }
+                            }}
+                            className="px-2 py-1 rounded-lg text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition"
+                            title="Mark lead as replied"
+                          >
+                            Mark Replied
+                          </button>
+                        )}
                         <button
                           onClick={() => handleDeleteLead(lead.id)}
                           className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition"

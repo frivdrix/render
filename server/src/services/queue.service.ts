@@ -84,10 +84,22 @@ export class QueueService {
   }
 
   /**
-   * Reset account sentToday counters at midnight
+   * Reset account sentToday counters at midnight in user timezone (Asia/Kolkata)
    */
-  private static checkAndResetDailyCounters() {
-    const todayStr = new Date().toISOString().slice(0, 10);
+  public static checkAndResetDailyCounters(tz: string = 'Asia/Kolkata') {
+    let todayStr: string;
+    try {
+      const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone: tz,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+      todayStr = formatter.format(new Date()); // returns YYYY-MM-DD in India time
+    } catch {
+      todayStr = new Date().toISOString().slice(0, 10);
+    }
+
     const accounts = db.getAccounts();
     for (const acc of accounts) {
       if (acc.lastResetDate !== todayStr) {

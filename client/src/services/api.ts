@@ -217,6 +217,17 @@ export const api = {
     return data;
   },
 
+  async updateLeadStatus(id: string, status: string): Promise<Lead> {
+    const res = await fetch(`${API_BASE}/leads/${id}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Failed to update lead status');
+    return data.lead;
+  },
+
   async deleteLead(id: string): Promise<boolean> {
     const res = await fetch(`${API_BASE}/leads/${id}`, { method: 'DELETE' });
     const data = await res.json();
@@ -240,6 +251,13 @@ export const api = {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
     const res = await fetch(`${API_BASE}/analytics/daily?tz=${encodeURIComponent(tz)}`);
     const data = await res.json();
+    return data;
+  },
+
+  async syncReplies(): Promise<{ success: boolean; scannedInboxes: number; newRepliesFound: number; message: string }> {
+    const res = await fetch(`${API_BASE}/analytics/sync-replies`, { method: 'POST' });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Failed to sync replies');
     return data;
   },
 

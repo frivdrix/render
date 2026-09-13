@@ -8,6 +8,7 @@ import trackingRoutes from './routes/tracking.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
 import settingsRoutes from './routes/settings.routes.js';
 import { QueueService } from './services/queue.service.js';
+import { ReplyScannerService } from './services/reply-scanner.service.js';
 import { db } from './database/db.js';
 
 dotenv.config();
@@ -44,8 +45,9 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   res.status(500).json({ success: false, error: err.message || 'Internal Server Error' });
 });
 
-// Start Background Campaign Queue Engine
+// Start Background Campaign Queue Engine & Reply Scanner Worker
 QueueService.start();
+ReplyScannerService.start();
 
 // Seed initial sample data if completely empty so user has an out-of-the-box working experience
 function seedDemoDataIfEmpty() {

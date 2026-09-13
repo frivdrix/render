@@ -185,4 +185,27 @@ router.delete('/campaign/:campaignId', (req: Request, res: Response) => {
   res.json({ success: true });
 });
 
+// PUT update lead status (e.g. mark as replied)
+router.put('/:id/status', (req: Request, res: Response) => {
+  const { status } = req.body;
+  const lead = db.getLeadById(req.params.id);
+  if (!lead) {
+    return res.status(404).json({ success: false, error: 'Lead not found' });
+  }
+
+  lead.status = status;
+  if (status === 'replied' && !lead.repliedAt) {
+    lead.repliedAt = Date.now();
+  }
+  db.saveLead(lead);
+
+  const campaign = db.getCampaignById(lead.campaignId);
+  if (campaign) {
+    campaign.stats.replied = db.getLeads(campaign.id).filter((l) => l.status === 'replied').length;
+    db.saveCampaign(campaign);
+  }
+
+  res.json({ success: true, lead });
+});
+
 export default router;

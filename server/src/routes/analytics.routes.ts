@@ -81,6 +81,24 @@ router.get('/overview', (_req: Request, res: Response) => {
 });
 
 /**
+ * POST /api/analytics/sync-replies
+ * Trigger instant manual reply scan across all inboxes
+ */
+router.post('/sync-replies', async (_req: Request, res: Response) => {
+  try {
+    const { ReplyScannerService } = await import('../services/reply-scanner.service.js');
+    const result = await ReplyScannerService.scanAllInboxes();
+    res.json({
+      success: true,
+      message: `Scanned ${result.scannedInboxes} inbox(es). Found ${result.newRepliesFound} new reply(ies)!`,
+      ...result,
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message || 'Failed to sync replies' });
+  }
+});
+
+/**
  * GET /api/analytics/daily
  * Persistent Day-by-Day Outreach Summary & Reply Breakdown
  */
