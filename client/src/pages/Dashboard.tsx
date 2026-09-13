@@ -21,6 +21,8 @@ export const Dashboard: React.FC = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [syncingReplies, setSyncingReplies] = useState(false);
+  const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
 
   const loadData = async () => {
     try {
@@ -57,22 +59,6 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  if (loading || !data) {
-    return (
-      <div className="flex items-center justify-center h-full min-h-[400px]">
-        <div className="flex items-center gap-3 text-brand-400">
-          <div className="animate-spin w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full" />
-          <span className="text-sm font-medium">Loading Deliverability Engine...</span>
-        </div>
-      </div>
-    );
-  }
-
-  const { stats, accountStats } = data;
-
-  const [syncingReplies, setSyncingReplies] = useState(false);
-  const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
-
   const handleSyncReplies = async () => {
     setSyncingReplies(true);
     setSyncFeedback(null);
@@ -87,6 +73,19 @@ export const Dashboard: React.FC = () => {
       setSyncingReplies(false);
     }
   };
+
+  if (loading || !data) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px]">
+        <div className="flex items-center gap-3 text-brand-400">
+          <div className="animate-spin w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full" />
+          <span className="text-sm font-medium">Loading Deliverability Engine...</span>
+        </div>
+      </div>
+    );
+  }
+
+  const { stats, accountStats } = data;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
