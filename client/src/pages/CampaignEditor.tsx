@@ -41,17 +41,17 @@ export const CampaignEditor: React.FC = () => {
   const [body, setBody] = useState('');
   const [accountIds, setAccountIds] = useState<string[]>([]);
   const [settings, setSettings] = useState<Campaign['settings']>({
-    trackOpens: true,
-    trackClicks: true,
-    plainTextMode: false,
+    trackOpens: false,
+    trackClicks: false,
+    plainTextMode: true,
     addUnsubscribeLink: false,
     dailyLimitPerAccount: 40,
     minJitterSeconds: 60,
     maxJitterSeconds: 180,
-    sendWindowStart: '09:00',
-    sendWindowEnd: '17:00',
-    timezone: 'America/New_York',
-    sendDays: [1, 2, 3, 4, 5],
+    sendWindowStart: '00:00',
+    sendWindowEnd: '23:59',
+    timezone: typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'Asia/Kolkata',
+    sendDays: [0, 1, 2, 3, 4, 5, 6],
   });
 
   // Modals & Tools
@@ -614,34 +614,62 @@ export const CampaignEditor: React.FC = () => {
           </div>
 
           {/* Schedule Windows & Jitter */}
-          <div className="pt-4 border-t border-slate-800 space-y-4">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
-              Human-Like Sending Pace & Jitter
-            </h4>
+          <div className="pt-4 border-t border-slate-800 space-y-5">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                Outreach Schedule & Allowed Sending Days
+              </h4>
+              <button
+                type="button"
+                onClick={() =>
+                  setSettings({
+                    ...settings,
+                    sendDays: [0, 1, 2, 3, 4, 5, 6],
+                    sendWindowStart: '00:00',
+                    sendWindowEnd: '23:59',
+                  })
+                }
+                className="text-[11px] font-bold text-brand-400 hover:text-brand-300 px-2.5 py-1 rounded-lg bg-brand-500/10 border border-brand-500/20"
+              >
+                ⚡ Set to 24/7 (Any Day & Time)
+              </button>
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs text-slate-400 block mb-1">Randomized Jitter Minimum (Seconds)</label>
-                <input
-                  type="number"
-                  min={10}
-                  max={600}
-                  value={settings.minJitterSeconds}
-                  onChange={(e) => setSettings({ ...settings, minJitterSeconds: parseInt(e.target.value, 10) })}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-slate-400 block mb-1">Randomized Jitter Maximum (Seconds)</label>
-                <input
-                  type="number"
-                  min={10}
-                  max={600}
-                  value={settings.maxJitterSeconds}
-                  onChange={(e) => setSettings({ ...settings, maxJitterSeconds: parseInt(e.target.value, 10) })}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500"
-                />
+            {/* Day Selector */}
+            <div className="space-y-2">
+              <label className="text-xs text-slate-400 block">Allowed Sending Days:</label>
+              <div className="grid grid-cols-7 gap-2">
+                {[
+                  { day: 0, label: 'Sun' },
+                  { day: 1, label: 'Mon' },
+                  { day: 2, label: 'Tue' },
+                  { day: 3, label: 'Wed' },
+                  { day: 4, label: 'Thu' },
+                  { day: 5, label: 'Fri' },
+                  { day: 6, label: 'Sat' },
+                ].map(({ day, label }) => {
+                  const isDayActive = (settings.sendDays || []).includes(day);
+                  return (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => {
+                        const current = settings.sendDays || [];
+                        const updated = isDayActive
+                          ? current.filter((d) => d !== day)
+                          : [...current, day].sort();
+                        setSettings({ ...settings, sendDays: updated });
+                      }}
+                      className={`py-2 px-1 text-center rounded-xl text-xs font-bold transition border ${
+                        isDayActive
+                          ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-sm shadow-emerald-500/10'
+                          : 'bg-slate-900 text-slate-500 border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -668,20 +696,46 @@ export const CampaignEditor: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Target Timezone</label>
+              <label className="text-xs text-slate-400 block mb-1">Timezone</label>
               <select
                 value={settings.timezone}
                 onChange={(e) => setSettings({ ...settings, timezone: e.target.value })}
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
               >
+                <option value="Asia/Kolkata">India Standard Time (IST) (UTC+5:30)</option>
                 <option value="America/New_York">Eastern Time (US & Canada) (UTC-5/UTC-4)</option>
                 <option value="America/Chicago">Central Time (US & Canada) (UTC-6/UTC-5)</option>
                 <option value="America/Los_Angeles">Pacific Time (US & Canada) (UTC-8/UTC-7)</option>
                 <option value="Europe/London">London / GMT</option>
                 <option value="Europe/Paris">Central European Time (CET)</option>
-                <option value="Asia/Kolkata">India Standard Time (IST)</option>
                 <option value="UTC">Coordinated Universal Time (UTC)</option>
               </select>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-800/80">
+              <div>
+                <label className="text-xs text-slate-400 block mb-1">Randomized Jitter Minimum (Seconds)</label>
+                <input
+                  type="number"
+                  min={10}
+                  max={600}
+                  value={settings.minJitterSeconds}
+                  onChange={(e) => setSettings({ ...settings, minJitterSeconds: parseInt(e.target.value, 10) })}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-slate-400 block mb-1">Randomized Jitter Maximum (Seconds)</label>
+                <input
+                  type="number"
+                  min={10}
+                  max={600}
+                  value={settings.maxJitterSeconds}
+                  onChange={(e) => setSettings({ ...settings, maxJitterSeconds: parseInt(e.target.value, 10) })}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500"
+                />
+              </div>
             </div>
           </div>
         </div>

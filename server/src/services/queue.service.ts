@@ -42,23 +42,25 @@ export class QueueService {
     for (const campaign of campaigns) {
       // 1. Check if within schedule window
       if (!this.isWithinSendingWindow(campaign)) {
+        console.log(`[QueueService] Campaign "${campaign.name}" (${campaign.id}) is outside configured sending window or day schedule.`);
         continue;
       }
 
-      // 2. Fetch available Google Accounts for this campaign
-      const assignedAccounts = db
-        .getAccounts()
-        .filter((a) => campaign.accountIds.includes(a.id) && a.status === 'active');
+      // 2. Fetch available Google Accounts for this campaign (auto-fallback to all active accounts if none assigned)
+      const allActiveAccounts = db.getAccounts().filter((a) => a.status === 'active');
+      const assignedAccounts = allActiveAccounts.filter((a) =>
+        campaign.accountIds && campaign.accountIds.length > 0 ? campaign.accountIds.includes(a.id) : true
+      );
 
       if (assignedAccounts.length === 0) {
-        console.warn(`[QueueService] Campaign "${campaign.name}" (${campaign.id}) has no active sender accounts.`);
+        console.warn(`[QueueService] Campaign "${campaign.name}" (${campaign.id}) has no active connected inboxes.`);
         continue;
       }
 
       // Find an account that has not exceeded daily limit and has passed cooloff delay
       const availableAccount = this.selectNextAccount(assignedAccounts, campaign);
       if (!availableAccount) {
-        // All accounts are either at daily limit or currently cooling down
+        // All accounts are either at daily limit or currently cooling down (waiting for jitter delay)
         continue;
       }
 
@@ -76,6 +78,7 @@ export class QueueService {
       }
 
       // 4. Dispatch Email
+      console.log(`[QueueService] Dispatching lead ${nextLead.email} via inbox ${availableAccount.email} for campaign "${campaign.name}"...`);
       await this.dispatchLead(campaign, availableAccount, nextLead);
     }
   }
