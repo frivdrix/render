@@ -109,10 +109,6 @@ export const Dashboard: React.FC = () => {
         <div>
           <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2.5">
             Agency Outbound Command Center
-            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              100% Pure Plain Text • 0 Tracking
-            </span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
             Zero Tracking Pixels • Native Google Workspace Inbox Rotation • 99% Primary Tab Delivery
@@ -184,8 +180,6 @@ export const Dashboard: React.FC = () => {
           subtitle="Prospect responses detected"
           icon={MessageSquare}
           color="amber"
-          trend="Positive"
-          trendType="positive"
         />
         <StatCard
           title="Overall Reply Rate"
@@ -193,8 +187,6 @@ export const Dashboard: React.FC = () => {
           subtitle="Pure Plain-Text deliverability"
           icon={Zap}
           color="purple"
-          trend="Primary Tab"
-          trendType="positive"
         />
         <StatCard
           title="Deliverability Shield"
@@ -202,8 +194,6 @@ export const Dashboard: React.FC = () => {
           subtitle="Zero Tracking Pixels • Native Inboxes"
           icon={ShieldCheck}
           color="green"
-          trend="Protected"
-          trendType="positive"
         />
       </div>
 

@@ -13,8 +13,8 @@ import {
 export const Sidebar: React.FC = () => {
   const navItems = [
     { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-    { to: '/summary', label: 'Daily Summary', icon: CalendarDays, badge: 'New' },
-    { to: '/accounts', label: 'Google Inboxes', icon: Mail, badge: 'Rotation' },
+    { to: '/summary', label: 'Daily Summary', icon: CalendarDays },
+    { to: '/accounts', label: 'Google Inboxes', icon: Mail },
     { to: '/campaigns', label: 'Campaigns', icon: Send },
     { to: '/settings', label: 'Settings', icon: Sliders },
   ];
@@ -49,22 +49,15 @@ export const Sidebar: React.FC = () => {
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 ${
+                  `flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 ${
                     isActive
                       ? 'bg-brand-500/15 text-brand-400 border border-brand-500/30 shadow-sm shadow-brand-500/10'
                       : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
                   }`
                 }
               >
-                <div className="flex items-center gap-3">
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </div>
-                {item.badge && (
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    {item.badge}
-                  </span>
-                )}
+                <Icon className="w-4 h-4" />
+                <span>{item.label}</span>
               </NavLink>
             );
           })}
