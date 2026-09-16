@@ -48,6 +48,11 @@ export const Accounts: React.FC = () => {
   const [bulkLimit, setBulkLimit] = useState(40);
   const [bulkLoading, setBulkLoading] = useState(false);
 
+  // Global Sending Limit for All Inboxes
+  const [globalLimit, setGlobalLimit] = useState(40);
+  const [updatingLimitAll, setUpdatingLimitAll] = useState(false);
+  const [globalLimitFeedback, setGlobalLimitFeedback] = useState<string | null>(null);
+
   // Test Send Form
   const [testEmail, setTestEmail] = useState('');
   const [testSending, setTestSending] = useState(false);
@@ -179,6 +184,22 @@ export const Accounts: React.FC = () => {
     loadAccounts();
   };
 
+  const handleUpdateGlobalLimit = async (limitToApply: number) => {
+    if (limitToApply < 1) return;
+    setUpdatingLimitAll(true);
+    setGlobalLimitFeedback(null);
+    try {
+      const res = await api.updateAllInboxesLimit(limitToApply);
+      setGlobalLimitFeedback(res.message);
+      await loadAccounts();
+      setTimeout(() => setGlobalLimitFeedback(null), 5000);
+    } catch (err: any) {
+      alert(err.message || 'Failed to update daily limit for inboxes');
+    } finally {
+      setUpdatingLimitAll(false);
+    }
+  };
+
   const handleSendTest = async () => {
     if (!selectedAccount || !testEmail) return;
     setTestSending(true);
@@ -283,6 +304,70 @@ export const Accounts: React.FC = () => {
                 </button>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Global Sending Limit Control for All Inboxes */}
+      {accounts.length > 0 && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900/90 to-purple-950/30 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-sm text-white">Global Daily Sending Limit</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-brand-500/20 text-brand-400 border border-brand-500/30">
+                All {accounts.length} Inboxes
+              </span>
+            </div>
+            <p className="text-xs text-slate-400">
+              Update the maximum emails sent per day across every connected Google Workspace mailbox in 1 click.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            {globalLimitFeedback && (
+              <span className="text-xs text-emerald-400 font-semibold animate-in fade-in bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl">
+                {globalLimitFeedback}
+              </span>
+            )}
+            <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+              {[20, 30, 40, 50, 100].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => {
+                    setGlobalLimit(preset);
+                    handleUpdateGlobalLimit(preset);
+                  }}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+                    globalLimit === preset
+                      ? 'bg-brand-500 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                  }`}
+                >
+                  {preset}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={1}
+                max={500}
+                value={globalLimit}
+                onChange={(e) => setGlobalLimit(parseInt(e.target.value, 10) || 1)}
+                className="w-20 bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-bold text-center focus:outline-none focus:border-brand-500"
+              />
+              <button
+                type="button"
+                onClick={() => handleUpdateGlobalLimit(globalLimit)}
+                disabled={updatingLimitAll}
+                className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 font-bold text-xs text-white shadow-lg shadow-brand-500/20 flex items-center gap-1.5 transition disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${updatingLimitAll ? 'animate-spin' : ''}`} />
+                <span>{updatingLimitAll ? 'Applying...' : 'Apply to All'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

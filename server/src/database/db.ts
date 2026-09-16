@@ -196,6 +196,42 @@ class Database {
     this.save();
   }
 
+  public updateDailyLimitAll(newLimit: number): void {
+    for (const acc of this.data.accounts) {
+      acc.dailyLimit = newLimit;
+    }
+    this.save();
+  }
+
+  public resetAllStatsAndTestData(): void {
+    for (const acc of this.data.accounts) {
+      acc.sentToday = 0;
+      acc.lastSentAt = undefined;
+    }
+    this.data.logs = [];
+    this.data.trackingEvents = [];
+    this.data.leads = [];
+    for (const c of this.data.campaigns) {
+      c.stats = {
+        totalLeads: 0,
+        sent: 0,
+        opened: 0,
+        clicked: 0,
+        replied: 0,
+        bounced: 0,
+      };
+      if (c.status === 'running') {
+        c.status = 'paused';
+      }
+    }
+    this.save();
+    if (this.mongoDb) {
+      this.mongoDb.collection('logs').deleteMany({}).catch((e) => console.error(e));
+      this.mongoDb.collection('trackingEvents').deleteMany({}).catch((e) => console.error(e));
+      this.mongoDb.collection('leads').deleteMany({}).catch((e) => console.error(e));
+    }
+  }
+
   public deleteAccount(id: string): boolean {
     const initialLen = this.data.accounts.length;
     this.data.accounts = this.data.accounts.filter((a) => a.id !== id);

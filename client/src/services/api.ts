@@ -55,6 +55,17 @@ export const api = {
     await fetch(`${API_BASE}/accounts/${id}/reset-limit`, { method: 'POST' });
   },
 
+  async updateAllInboxesLimit(dailyLimit: number): Promise<{ success: boolean; message: string; dailyLimit: number }> {
+    const res = await fetch(`${API_BASE}/accounts/bulk-limit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dailyLimit }),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Failed to update inboxes limit');
+    return data;
+  },
+
   async getOAuthUrl(): Promise<string> {
     const res = await fetch(`${API_BASE}/accounts/oauth/url`);
     const data = await res.json();
@@ -258,6 +269,13 @@ export const api = {
     const res = await fetch(`${API_BASE}/analytics/sync-replies`, { method: 'POST' });
     const data = await res.json();
     if (!data.success) throw new Error(data.error || 'Failed to sync replies');
+    return data;
+  },
+
+  async resetAllStats(): Promise<{ success: boolean; message: string }> {
+    const res = await fetch(`${API_BASE}/analytics/reset-all`, { method: 'POST' });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Failed to reset statistics');
     return data;
   },
 

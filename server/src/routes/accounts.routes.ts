@@ -211,6 +211,21 @@ router.post('/:id/test-send', async (req: Request, res: Response) => {
   }
 });
 
+// POST update daily limit for ALL accounts at once
+router.post('/bulk-limit', (req: Request, res: Response) => {
+  const { dailyLimit } = req.body;
+  const num = parseInt(dailyLimit, 10);
+  if (isNaN(num) || num < 1) {
+    return res.status(400).json({ success: false, error: 'Please provide a valid positive daily sending limit.' });
+  }
+  db.updateDailyLimitAll(num);
+  res.json({
+    success: true,
+    message: `Updated daily sending limit to ${num} emails/day across all ${db.getAccounts().length} connected inboxes!`,
+    dailyLimit: num,
+  });
+});
+
 // POST reset today count
 router.post('/:id/reset-limit', (req: Request, res: Response) => {
   const account = db.getAccountById(req.params.id);

@@ -104,6 +104,22 @@ router.post('/sync-replies', async (_req: Request, res: Response) => {
 });
 
 /**
+ * POST /api/analytics/reset-all
+ * Wipe all test data, sent logs, and reset dashboard statistics to 0
+ */
+router.post('/reset-all', (_req: Request, res: Response) => {
+  try {
+    db.resetAllStatsAndTestData();
+    res.json({
+      success: true,
+      message: 'All test data, outreach logs, and metrics have been reset to zero.',
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message || 'Failed to reset statistics' });
+  }
+});
+
+/**
  * GET /api/analytics/daily
  * Persistent Day-by-Day Outreach Summary & Reply Breakdown
  */

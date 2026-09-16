@@ -4,6 +4,7 @@ import {
   Save,
   CheckCircle2,
   Database,
+  RotateCcw,
 } from 'lucide-react';
 import { api } from '../services/api.js';
 import { SystemSettings } from '../types/index.js';
@@ -137,6 +138,35 @@ export const Settings: React.FC = () => {
                 Render Cloud + UptimeRobot keep-alive active
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* Data & Statistics Management */}
+        <div className="p-6 rounded-2xl bg-rose-950/20 border border-rose-500/30 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-bold text-sm text-rose-300">Reset All Outbound Statistics & Test Data</h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Wipes all historical test logs, lead records, and resets dashboard counters to 0. Connected inboxes remain safe.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                if (confirm('Reset all dashboard metrics and logs to ZERO (0)? This cannot be undone.')) {
+                  try {
+                    const res = await api.resetAllStats();
+                    alert(res.message);
+                  } catch (err: any) {
+                    alert(err.message || 'Failed to reset statistics');
+                  }
+                }
+              }}
+              className="px-4 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-300 text-xs font-bold transition flex items-center gap-1.5"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Reset All Stats to 0
+            </button>
           </div>
         </div>
 

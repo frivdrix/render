@@ -9,6 +9,7 @@ import {
   Pause,
   ArrowUpRight,
   RefreshCw,
+  RotateCcw,
 } from 'lucide-react';
 import { StatCard } from '../components/StatCard.js';
 import { api } from '../services/api.js';
@@ -73,6 +74,21 @@ export const Dashboard: React.FC = () => {
     }
   };
 
+  const handleResetStats = async () => {
+    if (confirm('Are you sure you want to reset all dashboard metrics, outreach logs, and test data to ZERO (0)? Connected inboxes will not be removed.')) {
+      setRefreshing(true);
+      try {
+        const res = await api.resetAllStats();
+        alert(res.message);
+        await loadData();
+      } catch (err: any) {
+        alert(err.message || 'Failed to reset statistics');
+      } finally {
+        setRefreshing(false);
+      }
+    }
+  };
+
   if (loading || !data) {
     return (
       <div className="flex items-center justify-center h-full min-h-[400px]">
@@ -103,7 +119,7 @@ export const Dashboard: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           {syncFeedback && (
             <span className="text-xs text-emerald-400 font-semibold animate-in fade-in bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl">
               {syncFeedback}
@@ -116,7 +132,7 @@ export const Dashboard: React.FC = () => {
             title="Scan connected inboxes for new prospect replies"
           >
             <MessageSquare className={`w-4 h-4 ${syncingReplies ? 'animate-spin' : ''}`} />
-            <span>{syncingReplies ? 'Scanning Inboxes...' : 'Sync Replies'}</span>
+            <span>{syncingReplies ? 'Scanning...' : 'Sync Replies'}</span>
           </button>
           <button
             onClick={() => {
@@ -127,6 +143,15 @@ export const Dashboard: React.FC = () => {
             title="Refresh Metrics"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-brand-400' : ''}`} />
+          </button>
+          <button
+            onClick={handleResetStats}
+            disabled={refreshing}
+            className="px-3 py-2.5 rounded-xl bg-slate-900 hover:bg-rose-950/40 border border-slate-800 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 text-xs font-semibold flex items-center gap-1.5 transition"
+            title="Wipe test data and reset statistics to 0"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Reset Stats</span>
           </button>
           <Link
             to="/summary"
