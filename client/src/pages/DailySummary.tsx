@@ -42,7 +42,9 @@ export const DailySummary: React.FC = () => {
 
   useEffect(() => {
     fetchDailyData();
-  }, []);
+    const interval = setInterval(fetchDailyData, 10000);
+    return () => clearInterval(interval);
+  }, [selectedDate]);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
