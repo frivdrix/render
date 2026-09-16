@@ -93,26 +93,6 @@ export const DailySummary: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={async () => {
-              setIsRefreshing(true);
-              try {
-                const res = await api.syncReplies();
-                alert(res.message);
-                await fetchDailyData();
-              } catch (err: any) {
-                alert(err.message || 'Failed to sync replies');
-              } finally {
-                setIsRefreshing(false);
-              }
-            }}
-            disabled={isRefreshing}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 text-sm font-semibold transition-all"
-            title="Scan connected inboxes for new replies"
-          >
-            <MessageSquare className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>Sync Replies</span>
-          </button>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-400">
             <Database className="w-3.5 h-3.5 text-emerald-400" />
             <span>100% Stored & Persisted</span>

@@ -21,8 +21,6 @@ export const Dashboard: React.FC = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [syncingReplies, setSyncingReplies] = useState(false);
-  const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
 
   const loadData = async () => {
     try {
@@ -56,21 +54,6 @@ export const Dashboard: React.FC = () => {
       loadData();
     } catch (err: any) {
       alert(err.message || 'Action failed');
-    }
-  };
-
-  const handleSyncReplies = async () => {
-    setSyncingReplies(true);
-    setSyncFeedback(null);
-    try {
-      const res = await api.syncReplies();
-      setSyncFeedback(res.message);
-      await loadData();
-      setTimeout(() => setSyncFeedback(null), 5000);
-    } catch (err: any) {
-      alert(err.message || 'Failed to sync replies');
-    } finally {
-      setSyncingReplies(false);
     }
   };
 
@@ -116,20 +99,6 @@ export const Dashboard: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2.5">
-          {syncFeedback && (
-            <span className="text-xs text-emerald-400 font-semibold animate-in fade-in bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl">
-              {syncFeedback}
-            </span>
-          )}
-          <button
-            onClick={handleSyncReplies}
-            disabled={syncingReplies}
-            className="px-3.5 py-2.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 font-bold text-xs flex items-center gap-2 transition"
-            title="Scan connected inboxes for new prospect replies"
-          >
-            <MessageSquare className={`w-4 h-4 ${syncingReplies ? 'animate-spin' : ''}`} />
-            <span>{syncingReplies ? 'Scanning...' : 'Sync Replies'}</span>
-          </button>
           <button
             onClick={() => {
               setRefreshing(true);
