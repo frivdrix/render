@@ -7,8 +7,7 @@ import {
   Trash2,
   Edit,
   ArrowRight,
-  Eye,
-  MousePointer,
+  ShieldCheck,
   MessageSquare,
   Users,
 } from 'lucide-react';
@@ -120,8 +119,6 @@ export const Campaigns: React.FC = () => {
       ) : (
         <div className="space-y-3">
           {campaigns.map((camp) => {
-            const openRate = camp.stats.sent > 0 ? Math.round((camp.stats.opened / camp.stats.sent) * 100) : 0;
-            const clickRate = camp.stats.sent > 0 ? Math.round((camp.stats.clicked / camp.stats.sent) * 100) : 0;
             const replyRate = camp.stats.sent > 0 ? Math.round((camp.stats.replied / camp.stats.sent) * 100) : 0;
 
             return (
@@ -167,16 +164,12 @@ export const Campaigns: React.FC = () => {
                       Sent: <b className="text-slate-200">{camp.stats.sent}</b>
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <Eye className="w-3.5 h-3.5 text-emerald-400" />
-                      Opens: <b className="text-emerald-400">{openRate}%</b> ({camp.stats.opened})
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <MousePointer className="w-3.5 h-3.5 text-purple-400" />
-                      Clicks: <b className="text-purple-400">{clickRate}%</b>
-                    </span>
-                    <span className="flex items-center gap-1.5">
                       <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
                       Replies: <b className="text-amber-400">{replyRate}%</b> ({camp.stats.replied})
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                      Deliverability: <b className="text-emerald-400">100% Plain Text</b>
                     </span>
                   </div>
                 </div>

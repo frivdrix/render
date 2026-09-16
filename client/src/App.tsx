@@ -1,12 +1,11 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Navigate, Routes, Route } from 'react-router-dom';
 import { Sidebar } from './components/Sidebar.js';
 import { Dashboard } from './pages/Dashboard.js';
 import { DailySummary } from './pages/DailySummary.js';
 import { Accounts } from './pages/Accounts.js';
 import { Campaigns } from './pages/Campaigns.js';
 import { CampaignEditor } from './pages/CampaignEditor.js';
-import { LeadsView } from './pages/LeadsView.js';
 import { Settings } from './pages/Settings.js';
 
 export const App: React.FC = () => {
@@ -20,7 +19,7 @@ export const App: React.FC = () => {
           <Route path="/accounts" element={<Accounts />} />
           <Route path="/campaigns" element={<Campaigns />} />
           <Route path="/campaigns/:id" element={<CampaignEditor />} />
-          <Route path="/leads" element={<LeadsView />} />
+          <Route path="/leads" element={<Navigate to="/campaigns" replace />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </main>

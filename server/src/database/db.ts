@@ -255,8 +255,12 @@ class Database {
 
   public deleteCampaign(id: string): boolean {
     this.data.campaigns = this.data.campaigns.filter((c) => c.id !== id);
-    this.data.leads = this.data.leads.filter((l) => l.campaignId !== id);
-    this.data.logs = this.data.logs.filter((l) => l.campaignId !== id);
+    // Keep logs and already sent/replied leads permanently so Daily Summary and reply rates are never lost!
+    // Only remove un-sent / pending leads from this deleted campaign
+    this.data.leads = this.data.leads.filter(
+      (l) => l.campaignId !== id || l.status === 'sent' || l.status === 'replied' || l.status === 'bounced'
+    );
+    // IMPORTANT: Logs (this.data.logs) are NEVER deleted, preserving 100% permanent history.
     this.save();
     return true;
   }
@@ -319,6 +323,21 @@ class Database {
       this.data.logs = this.data.logs.slice(0, 5000);
     }
     this.save();
+  }
+
+  public updateLogReply(leadIdOrToEmail: string, repliedAt: number): void {
+    const norm = leadIdOrToEmail.trim().toLowerCase();
+    let updated = false;
+    for (const log of this.data.logs) {
+      if (log.leadId === leadIdOrToEmail || log.toEmail.trim().toLowerCase() === norm) {
+        log.status = 'replied';
+        log.repliedAt = repliedAt;
+        updated = true;
+      }
+    }
+    if (updated) {
+      this.save();
+    }
   }
 
   // TRACKING EVENTS

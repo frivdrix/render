@@ -11,14 +11,19 @@ router.get('/overview', (_req: Request, res: Response) => {
   const events = db.getTrackingEvents();
 
   const totalLeads = leads.length;
-  const totalSent = leads.filter((l) => ['sent', 'opened', 'clicked', 'replied'].includes(l.status)).length;
-  const totalOpened = leads.filter((l) => l.status === 'opened' || l.openCount > 0).length;
-  const totalClicked = leads.filter((l) => l.status === 'clicked' || l.clickCount > 0).length;
-  const totalReplied = leads.filter((l) => l.status === 'replied').length;
-  const totalBounced = leads.filter((l) => l.status === 'bounced').length;
+  const leadSentCount = leads.filter((l) => ['sent', 'opened', 'clicked', 'replied'].includes(l.status)).length;
+  const logSentCount = logs.filter((l) => l.status === 'sent' || l.status === 'replied').length;
+  const totalSent = Math.max(leadSentCount, logSentCount);
 
-  const openRate = totalSent > 0 ? ((totalOpened / totalSent) * 100).toFixed(1) : '0';
-  const clickRate = totalSent > 0 ? ((totalClicked / totalSent) * 100).toFixed(1) : '0';
+  const totalReplied = Math.max(
+    leads.filter((l) => l.status === 'replied').length,
+    logs.filter((l) => l.status === 'replied').length
+  );
+  const totalBounced = Math.max(
+    leads.filter((l) => l.status === 'bounced').length,
+    logs.filter((l) => l.status === 'bounced' || l.status === 'failed').length
+  );
+
   const replyRate = totalSent > 0 ? ((totalReplied / totalSent) * 100).toFixed(1) : '0';
   const bounceRate = totalSent > 0 ? ((totalBounced / totalSent) * 100).toFixed(1) : '0';
 
@@ -31,7 +36,7 @@ router.get('/overview', (_req: Request, res: Response) => {
 
   // Account sending distribution
   const accountStats = accounts.map((acc) => {
-    const accLogs = logs.filter((l) => l.accountId === acc.id && l.status === 'sent');
+    const accLogs = logs.filter((l) => l.accountId === acc.id && (l.status === 'sent' || l.status === 'replied'));
     return {
       id: acc.id,
       email: acc.email,
@@ -61,12 +66,12 @@ router.get('/overview', (_req: Request, res: Response) => {
     stats: {
       totalLeads,
       totalSent,
-      totalOpened,
-      totalClicked,
+      totalOpened: 0,
+      totalClicked: 0,
       totalReplied,
       totalBounced,
-      openRate: `${openRate}%`,
-      clickRate: `${clickRate}%`,
+      openRate: '0%',
+      clickRate: '0%',
       replyRate: `${replyRate}%`,
       bounceRate: `${bounceRate}%`,
       healthScore,
@@ -192,8 +197,11 @@ router.get('/daily', (req: Request, res: Response) => {
     }
 
     const day = daysMap.get(dateStr)!;
-    if (log.status === 'sent') {
+    if (log.status === 'sent' || log.status === 'replied') {
       day.sentCount += 1;
+    }
+    if (log.status === 'replied') {
+      day.repliedCount += 1;
     } else if (log.status === 'bounced' || log.status === 'failed') {
       day.bouncedCount += 1;
     }
@@ -201,7 +209,7 @@ router.get('/daily', (req: Request, res: Response) => {
     const fromEmail = log.fromEmail || accountMap.get(log.accountId) || 'Unknown Inbox';
     day.inboxCounts[fromEmail] = (day.inboxCounts[fromEmail] || 0) + 1;
 
-    const campaignName = campaignMap.get(log.campaignId) || 'Outreach Campaign';
+    const campaignName = log.campaignName || campaignMap.get(log.campaignId) || 'Outreach Campaign';
     day.campaignCounts[campaignName] = (day.campaignCounts[campaignName] || 0) + 1;
 
     day.logs.push({
@@ -215,14 +223,19 @@ router.get('/daily', (req: Request, res: Response) => {
     });
   }
 
-  // Count replies associated with dates
+  // Count replies associated with dates from leads (if not already counted in logs)
   for (const lead of leads) {
     if (lead.status === 'replied') {
-      // Attribute reply to the day the original email was sent (or repliedAt date)
       const targetTimestamp = lead.sentAt || lead.repliedAt || lead.createdAt;
       const dateStr = toDateStr(targetTimestamp);
       if (daysMap.has(dateStr)) {
-        daysMap.get(dateStr)!.repliedCount += 1;
+        const day = daysMap.get(dateStr)!;
+        const alreadyCounted = day.logs.some(
+          (l) => l.toEmail.toLowerCase() === lead.email.toLowerCase() && l.status === 'replied'
+        );
+        if (!alreadyCounted) {
+          day.repliedCount += 1;
+        }
       }
     }
   }

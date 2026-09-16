@@ -4,7 +4,6 @@ import {
   MessageSquare,
   ShieldCheck,
   Zap,
-  Users,
   Mail,
   Play,
   Pause,
@@ -150,30 +149,32 @@ export const Dashboard: React.FC = () => {
         <StatCard
           title="Total Outbound Sent"
           value={stats.totalSent}
-          subtitle={`Across ${stats.totalCampaigns} active campaigns`}
+          subtitle={`Across ${stats.totalCampaigns} campaigns`}
           icon={Send}
           color="blue"
         />
         <StatCard
-          title="Total Leads"
-          value={stats.totalLeads}
-          subtitle="Prospects in database"
-          icon={Users}
-          color="purple"
-        />
-        <StatCard
-          title="Reply Rate"
-          value={stats.replyRate}
-          subtitle={`${stats.totalReplied} positive responses`}
+          title="Replies Received"
+          value={stats.totalReplied}
+          subtitle="Prospect responses detected"
           icon={MessageSquare}
           color="amber"
+          trend="Positive"
+          trendType="positive"
+        />
+        <StatCard
+          title="Overall Reply Rate"
+          value={stats.replyRate}
+          subtitle="Pure Plain-Text deliverability"
+          icon={Zap}
+          color="purple"
           trend="Primary Tab"
           trendType="positive"
         />
         <StatCard
-          title="Sender Health"
-          value="99.9%"
-          subtitle="Zero Tracking • No Spam Flags"
+          title="Deliverability Shield"
+          value="100%"
+          subtitle="Zero Tracking Pixels • Native Inboxes"
           icon={ShieldCheck}
           color="green"
           trend="Protected"

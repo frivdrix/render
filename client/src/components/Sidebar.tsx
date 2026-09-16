@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   CalendarDays,
   Mail,
-  Users,
   Send,
   Sliders,
   ShieldCheck,
@@ -17,7 +16,6 @@ export const Sidebar: React.FC = () => {
     { to: '/summary', label: 'Daily Summary', icon: CalendarDays, badge: 'New' },
     { to: '/accounts', label: 'Google Inboxes', icon: Mail, badge: 'Rotation' },
     { to: '/campaigns', label: 'Campaigns', icon: Send },
-    { to: '/leads', label: 'Lead Database', icon: Users },
     { to: '/settings', label: 'Settings', icon: Sliders },
   ];
 

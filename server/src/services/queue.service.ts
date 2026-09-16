@@ -249,6 +249,7 @@ export class QueueService {
       const log: EmailLog = {
         id: uuidv4(),
         campaignId: campaign.id,
+        campaignName: campaign.name,
         leadId: lead.id,
         accountId: account.id,
         toEmail: lead.email,
@@ -274,6 +275,7 @@ export class QueueService {
       const log: EmailLog = {
         id: uuidv4(),
         campaignId: campaign.id,
+        campaignName: campaign.name,
         leadId: lead.id,
         accountId: account.id,
         toEmail: lead.email,

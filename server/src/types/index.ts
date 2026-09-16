@@ -102,6 +102,7 @@ export interface Campaign {
 export interface EmailLog {
   id: string;
   campaignId: string;
+  campaignName?: string;
   leadId: string;
   accountId: string;
   toEmail: string;
@@ -110,6 +111,7 @@ export interface EmailLog {
   bodyPreview: string;
   status: 'sent' | 'failed' | 'opened' | 'clicked' | 'replied' | 'bounced';
   sentAt: number;
+  repliedAt?: number;
   metadata?: Record<string, any>;
 }
 

@@ -506,7 +506,7 @@ export const CampaignEditor: React.FC = () => {
                       <th className="p-3.5">Company</th>
                       <th className="p-3.5">Custom Subject / Body</th>
                       <th className="p-3.5">Status</th>
-                      <th className="p-3.5 text-right">Opens / Clicks</th>
+                      <th className="p-3.5 text-right">Delivery / Reply Activity</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/60">
@@ -521,9 +521,7 @@ export const CampaignEditor: React.FC = () => {
                         <td className="p-3.5">
                           <span
                             className={`px-2 py-0.5 rounded-full text-[10px] font-sans font-bold uppercase tracking-wider ${
-                              lead.status === 'opened'
-                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                : lead.status === 'replied'
+                              lead.status === 'replied'
                                 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                                 : lead.status === 'sent'
                                 ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
@@ -536,10 +534,12 @@ export const CampaignEditor: React.FC = () => {
                           </span>
                         </td>
                         <td className="p-3.5 text-right text-slate-300">
-                          {lead.openCount > 0 ? (
-                            <span className="text-emerald-400 font-bold">{lead.openCount} opens</span>
+                          {lead.status === 'replied' ? (
+                            <span className="text-amber-400 font-bold">💬 Replied</span>
+                          ) : lead.status === 'sent' ? (
+                            <span className="text-blue-400">✓ Delivered (Plain Text)</span>
                           ) : (
-                            '0 opens'
+                            <span className="text-slate-500">Queued</span>
                           )}
                         </td>
                       </tr>

@@ -129,9 +129,11 @@ export class ReplyScannerService {
           if (matchedLeads && matchedLeads.length > 0) {
             for (const lead of matchedLeads) {
               if (lead.status !== 'replied') {
+                const repliedTime = msg.internalDate ? new Date(msg.internalDate).getTime() : Date.now();
                 lead.status = 'replied';
-                lead.repliedAt = msg.internalDate ? new Date(msg.internalDate).getTime() : Date.now();
+                lead.repliedAt = repliedTime;
                 db.saveLead(lead);
+                db.updateLogReply(lead.id, repliedTime);
 
                 // Update campaign stats
                 const campaign = campaigns.find((c) => c.id === lead.campaignId) || db.getCampaignById(lead.campaignId);
@@ -205,9 +207,11 @@ export class ReplyScannerService {
           if (matchedLeads && matchedLeads.length > 0) {
             for (const lead of matchedLeads) {
               if (lead.status !== 'replied') {
+                const repliedTime = Date.now();
                 lead.status = 'replied';
-                lead.repliedAt = Date.now();
+                lead.repliedAt = repliedTime;
                 db.saveLead(lead);
+                db.updateLogReply(lead.id, repliedTime);
 
                 const campaign = campaigns.find((c) => c.id === lead.campaignId) || db.getCampaignById(lead.campaignId);
                 if (campaign) {
